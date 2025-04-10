@@ -16,10 +16,10 @@ function Signup() {
 
     const data = await res.json();
     if (data.success) {
-      alert('Account created! You can now log in.');
-      navigate('/');
+      alert('Signup successful! Please log in.');
+      navigate('/'); // ✅ This is what redirects to login
     } else {
-      alert(data.message || 'Signup failed. Please try again.');
+      alert(data.message || 'Signup failed.');
     }
   };
 
@@ -30,27 +30,26 @@ function Signup() {
         <input
           type="text"
           placeholder="Username"
-          required
           value={form.username}
-          onChange={e => setForm({ ...form, username: e.target.value })}
+          onChange={(e) => setForm({ ...form, username: e.target.value })}
+          required
         /><br /><br />
         <input
           type="email"
           placeholder="Email"
-          required
           value={form.email}
-          onChange={e => setForm({ ...form, email: e.target.value })}
+          onChange={(e) => setForm({ ...form, email: e.target.value })}
+          required
         /><br /><br />
         <input
           type="password"
           placeholder="Password"
-          required
           value={form.password}
-          onChange={e => setForm({ ...form, password: e.target.value })}
+          onChange={(e) => setForm({ ...form, password: e.target.value })}
+          required
         /><br /><br />
         <button type="submit">Sign Up</button>
       </form>
-      <p>Already have an account? <a href="/">Login</a></p>
     </div>
   );
 }
