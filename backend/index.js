@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
-const mysql = require('mysql2');
-const bcrypt = require('bcryptjs'); // 🔒 for password hashing
+const bcrypt = require('bcryptjs');
+const { Client } = require('pg');
 
 const app = express();
 const port = 3001;
@@ -9,85 +9,91 @@ const port = 3001;
 app.use(cors());
 app.use(express.json());
 
-// Connect to MySQL
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'youShallPass1!',  
-  database: 'study_group_finder'
-});
-
-db.connect(err => {
-  if (err) {
-    console.error('DB connection error:', err);
-    return;
+// 🔐 Connect to Supabase PostgreSQL
+const db = new Client({
+  host: 'db.pbhtnogygaoebydhivhf.supabase.co',
+  port: 5432,
+  user: 'postgres',
+  password: 'youShallPass1!',
+  database: 'postgres',
+  ssl: {
+    rejectUnauthorized: false
   }
-  console.log('Connected to MySQL database');
+});
+
+db.connect()
+  .then(() => console.log('✅ Connected to Supabase PostgreSQL'))
+  .catch((err) => console.error('❌ DB connection error:', err));
+
+// ==========================
+// Health Check
+// ==========================
+app.get('/', (req, res) => {
+  res.send('Supabase-Connected API is running!');
 });
 
 // ==========================
-// GET all study groups
+// Get Study Groups
 // ==========================
-app.get('/groups', (req, res) => {
-  db.query('SELECT * FROM study_groups', (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(results);
-  });
+app.get('/groups', async (req, res) => {
+  try {
+    const result = await db.query('SELECT * FROM study_groups');
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error fetching groups:', err);
+    res.status(500).json({ error: 'Failed to fetch study groups' });
+  }
 });
 
 // ==========================
-// POST Signup
+// Signup Route
 // ==========================
 app.post('/signup', async (req, res) => {
   const { username, email, password } = req.body;
 
   try {
     const password_hash = await bcrypt.hash(password, 10);
-    db.query(
-      'INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)',
-      [username, email, password_hash],
-      (err, result) => {
-        if (err) {
-          console.error(err);
-          return res.status(500).json({ success: false, message: 'Email may already exist or DB error' });
-        }
-        res.json({ success: true });
-      }
+    const result = await db.query(
+      'INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3)',
+      [username, email, password_hash]
     );
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Something went wrong' });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Signup error:', err);
+    res.status(500).json({ success: false, message: 'Signup failed' });
   }
 });
 
 // ==========================
-// POST Login
+// Login Route
 // ==========================
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
-  db.query('SELECT * FROM users WHERE email = ?', [email], async (err, results) => {
-    if (err || results.length === 0) {
-      return res.json({ success: false, message: 'User not found' });
+  try {
+    const result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+
+    if (result.rows.length === 0) {
+      return res.status(401).json({ success: false, message: 'User not found' });
     }
 
-    const user = results[0];
+    const user = result.rows[0];
+    const match = await bcrypt.compare(password, user.password_hash);
 
-    try {
-      const match = await bcrypt.compare(password, user.password_hash);
-      if (match) {
-        res.json({ success: true, user_id: user.user_id });
-      } else {
-        res.json({ success: false, message: 'Incorrect password' });
-      }
-    } catch (error) {
-      res.status(500).json({ success: false, message: 'Login error' });
+    if (match) {
+      res.json({ success: true, user_id: user.user_id });
+    } else {
+      res.status(401).json({ success: false, message: 'Incorrect password' });
     }
-  });
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ success: false, message: 'Login failed' });
+  }
 });
 
 // ==========================
 // Start Server
 // ==========================
 app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
+  console.log("🚀 Server running on http://localhost:${port}");
 });
