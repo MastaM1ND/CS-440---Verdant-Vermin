@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2');
-const bcrypt = require('bcryptjs'); // 🔒 for password hashing
+const bcrypt = require('bcryptjs'); // for password hashing
 
 const app = express();
 const port = 3001;
@@ -11,7 +11,7 @@ app.use(express.json());
 
 // Connect to MySQL
 const db = mysql.createConnection({
-  host: 'localhost',
+  host: '172.24.208.1',
   user: 'root',
   password: 'youShallPass1!',  
   database: 'study_group_finder'
@@ -91,3 +91,4 @@ app.post('/login', (req, res) => {
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
+
