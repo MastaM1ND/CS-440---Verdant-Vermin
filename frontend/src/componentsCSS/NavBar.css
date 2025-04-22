@@ -1,0 +1,40 @@
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #333;
+    color: #fff;
+    padding: 1rem;
+}
+  
+.navbar_left .navbar_logo {
+font-size: 1.5rem;
+font-weight: bold;
+color: #fff;
+text-decoration: none;
+}
+
+.navbar_links {
+list-style-type: none;
+display: flex;
+margin: 0;
+padding: 0;
+}
+
+
+.navbar_links li {
+    margin-right: 1rem;
+    padding: 0.5rem 1rem; /* Add padding for box size */
+    border: 1px solid #fff; /* Add a border around the box */
+    background-color: #444; /* Add a background color */
+    border-radius: 5px; /* Optional: Add rounded corners */
+}
+
+.navbar_links li:hover {
+    background-color: #494d4b; /* Optional: Change background on hover */
+}
+
+.navbar_links Link {
+color: #fff;
+text-decoration: none;
+}
