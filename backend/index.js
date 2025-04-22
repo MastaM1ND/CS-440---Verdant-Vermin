@@ -9,7 +9,7 @@ const port = 3001;
 app.use(cors());
 app.use(express.json());
 
-// 🔐 Connect to Supabase PostgreSQL
+// Connect to Supabase PostgreSQL
 const db = new Client({
   host: 'db.pbhtnogygaoebydhivhf.supabase.co',
   port: 5432,
@@ -21,20 +21,23 @@ const db = new Client({
   }
 });
 
+/**
+ * connect to supabase db
+ */
 db.connect()
-  .then(() => console.log('✅ Connected to Supabase PostgreSQL'))
-  .catch((err) => console.error('❌ DB connection error:', err));
+  .then(() => console.log('Connected to Supabase PostgreSQL'))
+  .catch((err) => console.error('DB connection error:', err));
 
-// ==========================
-// Health Check
-// ==========================
+/**
+ * check if server is running
+ */
 app.get('/', (req, res) => {
   res.send('Supabase-Connected API is running!');
 });
 
-// ==========================
-// Get Study Groups
-// ==========================
+/**
+ * get study groups
+ */
 app.get('/groups', async (req, res) => {
   try {
     const result = await db.query('SELECT * FROM study_groups');
@@ -45,9 +48,9 @@ app.get('/groups', async (req, res) => {
   }
 });
 
-// ==========================
-// Signup Route
-// ==========================
+/**
+ * Signup Route
+ */
 app.post('/signup', async (req, res) => {
   const { username, email, password } = req.body;
 
@@ -64,9 +67,9 @@ app.post('/signup', async (req, res) => {
   }
 });
 
-// ==========================
-// Login Route
-// ==========================
+/**
+ * Login Route
+ */
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -91,9 +94,9 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// ==========================
-// Start Server
-// ==========================
+/**
+ * Listen to port and log url
+ */
 app.listen(port, () => {
-  console.log("🚀 Server running on http://localhost:${port}");
+  console.log(`Server running on http://localhost:${port}`);
 });
