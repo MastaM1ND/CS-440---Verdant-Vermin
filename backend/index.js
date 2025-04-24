@@ -94,6 +94,48 @@ app.post('/login', async (req, res) => {
   }
 });
 
+
+/**
+ * create group route
+ */
+app.post('/create_group', async (req, res) => {
+  const { group_name, course, group_type, max_members } = req.body;
+  const user_id = req.headers['user_id'];
+
+  try {
+
+    const course_result = await db.query(
+      'SELECT course_id FROM courses WHERE course_name = $1',
+      [course]
+    )
+    const course_id = course_result.rows[0]?.course_id;
+
+    await db.query(
+      'INSERT INTO study_groups (group_name, group_type, max_members, group_course_id) VALUES ($1, $2, $3, $4)',
+      [group_name, group_type, max_members, course_id]
+    );
+
+    const study_group_result = await db.query(
+      'SELECT group_id FROM study_groups WHERE group_name = $1',
+      [group_name]
+    );
+    const study_group_id = study_group_result.rows[0]?.group_id;
+
+    await db.query(
+      'INSERT INTO group_members (study_group_id, member_id, role, status) VALUES ($1, $2, $3, $4)',
+      [study_group_id, user_id, "Creator", "Active"]
+    )
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error('Group Creation error:', err);
+    res.status(500).json({ success: false, message: 'Failed to Create Group' });
+  }
+});
+
+
+
 /**
  * Listen to port and log url
  */
