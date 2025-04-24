@@ -11,33 +11,30 @@ app.use(express.json());
 
 // Connect to Supabase PostgreSQL
 const db = new Client({
-  host: 'db.pbhtnogygaoebydhivhf.supabase.co',
+  host: 'db.pbhtnogygaoebydhivhf.supabase.co', 
   port: 5432,
   user: 'postgres',
-  password: 'youShallPass1!',
+  password: 'youShallPass1!', 
   database: 'postgres',
   ssl: {
     rejectUnauthorized: false
   }
 });
 
-/**
- * connect to supabase db
- */
 db.connect()
   .then(() => console.log('Connected to Supabase PostgreSQL'))
   .catch((err) => console.error('DB connection error:', err));
 
-/**
- * check if server is running
- */
+// ==========================
+// Health Check
+// ==========================
 app.get('/', (req, res) => {
   res.send('Supabase-Connected API is running!');
 });
 
-/**
- * get study groups
- */
+// ==========================
+// Get Study Groups
+// ==========================
 app.get('/groups', async (req, res) => {
   try {
     const result = await db.query('SELECT * FROM study_groups');
@@ -48,15 +45,15 @@ app.get('/groups', async (req, res) => {
   }
 });
 
-/**
- * Signup Route
- */
+// ==========================
+// Signup Route
+// ==========================
 app.post('/signup', async (req, res) => {
   const { username, email, password } = req.body;
 
   try {
     const password_hash = await bcrypt.hash(password, 10);
-    const result = await db.query(
+    await db.query(
       'INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3)',
       [username, email, password_hash]
     );
@@ -67,9 +64,9 @@ app.post('/signup', async (req, res) => {
   }
 });
 
-/**
- * Login Route
- */
+// ==========================
+// Login Route
+// ==========================
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -133,8 +130,6 @@ app.post('/create_group', async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to Create Group' });
   }
 });
-
-
 
 /**
  * Listen to port and log url

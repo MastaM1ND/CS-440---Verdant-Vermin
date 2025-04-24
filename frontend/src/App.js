@@ -1,20 +1,50 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Login from './Login';
 import Signup from './Signup';
 import Groups from './Groups';
 import NavBar from './components/NavBar';
 import CreateGroup from './CreateGroup';
+import RequireAuth from './components/RequireAuth';
+
+// This inner component allows dynamic hiding of NavBar
+function AppRoutes() {
+  const location = useLocation();
+  const hideNav = location.pathname === '/' || location.pathname === '/signup';
+
+  return (
+    <>
+      {!hideNav && <NavBar />}
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+
+        {/* Protected Route */}
+        <Route
+          path="/groups"
+          element={
+            <RequireAuth>
+              <Groups />
+            </RequireAuth>
+          }
+        />
+        <Route 
+          path="/create_group" 
+          element={
+            <RequireAuth>
+              <CreateGroup />
+            </RequireAuth>
+          } 
+        />
+      </Routes>
+    </>
+  );
+}
 
 function App() {
   return (
     <Router>
-      <NavBar />
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/groups" element={<Groups />} />
-        <Route path="/create_group" element={<CreateGroup />} />
-      </Routes>
+      <AppRoutes />
     </Router>
   );
 }
