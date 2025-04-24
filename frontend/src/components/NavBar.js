@@ -8,38 +8,32 @@ const NavBar = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('user');
-    navigate('/'); // Redirect to login
+    navigate('/');
   };
 
   return (
     <nav className="navbar">
-      <div className="navbar_left">
-        <Link to="/groups" className="navbar_logo">
-          Study Group Finder
-        </Link>
+      <div className="navbar-logo">
+        <Link to="/groups">📚 Study Group Finder</Link>
       </div>
 
-      <div className="navbar_center">
-        {user && (
-          <ul className="navbar_links">
-            <li><Link to="/groups">Home</Link></li>
-            <li><Link to="/create_group">Create Group</Link></li>
-            <li><Link to="/account">Account</Link></li>
-          </ul>
+      {user && (
+        <div className="navbar-links">
+          <Link to="/groups">Home</Link>
+          <Link to="/create_group">Create Group</Link>
+          <Link to="/account">Account</Link>
+        </div>
+      )}
+
+      <div className="navbar-actions">
+        {user ? (
+          <button onClick={handleLogout}>Log Out</button>
+        ) : (
+          <>
+            <Link to="/">Login</Link>
+            <Link to="/signup">Sign Up</Link>
+          </>
         )}
-      </div>
-
-      <div className="navbar_right">
-        <ul className="navbar_links">
-          {user ? (
-            <li><button onClick={handleLogout}>Log Out</button></li>
-          ) : (
-            <>
-              <li><Link to="/">Log In</Link></li>
-              <li><Link to="/signup">Sign Up</Link></li>
-            </>
-          )}
-        </ul>
       </div>
     </nav>
   );

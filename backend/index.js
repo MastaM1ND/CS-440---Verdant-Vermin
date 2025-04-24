@@ -131,6 +131,38 @@ app.post('/create_group', async (req, res) => {
   }
 });
 
+// ==========================
+// Join a Study Group
+// ==========================
+app.post('/groups/:id/join', async (req, res) => {
+  const groupId = req.params.id;
+  const { user_id } = req.body;
+
+  try {
+    // Check if already a member
+    const check = await db.query(
+      'SELECT * FROM group_members WHERE study_group_id = $1 AND member_id = $2',
+      [groupId, user_id]
+    );
+
+    if (check.rows.length > 0) {
+      return res.status(400).json({ success: false, message: 'You are already a member of this group.' });
+    }
+
+    // Add member
+    await db.query(
+      'INSERT INTO group_members (study_group_id, member_id, role, status) VALUES ($1, $2, $3, $4)',
+      [groupId, user_id, 'member', 'active']
+    );
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Join group error:', err);
+    res.status(500).json({ success: false, message: 'Failed to join group' });
+  }
+});
+
+
 /**
  * Listen to port and log url
  */
