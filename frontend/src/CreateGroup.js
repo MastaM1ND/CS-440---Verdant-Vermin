@@ -22,12 +22,12 @@ function CreateGroup() {
         return;
         }
     
-        const user_id = localStorage.getItem('user_id');
+        const user = JSON.parse(localStorage.getItem('user'));
         const res = await fetch('http://localhost:3001/create_group', {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
-            'user_id': user_id
+            'user_id': user.user_id
           },
           body: JSON.stringify({ group_name, course, group_type, max_members })
         });

@@ -7,7 +7,11 @@ function Groups() {
   useEffect(() => {
     fetch('http://localhost:3001/groups')
       .then(res => res.json())
-      .then(data => setGroups(data))
+      .then(data => {
+        setGroups(data);
+        console.log(data);
+        console.log(data[0].member_count);
+      })
       .catch(err => console.error('Error fetching groups:', err));
   }, []);
 
@@ -56,7 +60,7 @@ function Groups() {
             }}
           >
             <strong>{group.group_name}</strong><br />
-            Type: {group.group_type} | Max Members: {group.max_members}
+            Type: {group.group_type} | Members: {group.member_count}/{group.max_members}
             <br />
             <button
               onClick={() => handleJoin(group.group_id)}
