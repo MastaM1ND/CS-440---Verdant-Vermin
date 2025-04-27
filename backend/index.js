@@ -37,9 +37,12 @@ app.get('/', (req, res) => {
 // ==========================
 app.get('/groups', async (req, res) => {
   try {
-    const result = await db.query('SELECT sg.*,COUNT(gm.member_id) AS member_count FROM study_groups sg\
+    const result = await db.query("SELECT sg.*, c.course_name, u.username AS owner_name, COUNT(gm.member_id) AS member_count FROM study_groups sg\
                                   LEFT JOIN group_members gm ON sg.group_id = gm.study_group_id\
-                                  GROUP BY sg.group_id;');
+                                  LEFT JOIN courses c ON sg.group_course_id = c.course_id\
+                                  LEFT JOIN users u ON gm.member_id = u.user_id\
+                                  WHERE gm.role = 'creator'\
+                                  GROUP BY sg.group_id, c.course_name, u.username;");
     res.json(result.rows);
   } catch (err) {
     console.error('Error fetching groups:', err);
