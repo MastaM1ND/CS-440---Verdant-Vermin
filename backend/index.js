@@ -44,7 +44,7 @@ app.get('/groups', async (req, res) => {
                                    LEFT JOIN users creator ON creator.user_id = (\
                                             SELECT gm2.member_id\
                                             FROM group_members gm2\
-                                            WHERE gm2.study_group_id = sg.group_id AND gm2.role = 'creator'\
+                                            WHERE gm2.study_group_id = sg.group_id AND LOWER(gm2.role) = 'creator'\
                                             LIMIT 1\
                                    )\
                                    GROUP BY sg.group_id, c.course_name, creator.username");
@@ -106,7 +106,7 @@ app.post('/login', async (req, res) => {
  * create group route
  */
 app.post('/create_group', async (req, res) => {
-  const { group_name, course, group_type, max_members } = req.body;
+  const { group_name, course, group_type, max_members, meeting_time, location } = req.body;
   const user_id = req.headers['user_id'];
 
   try {
@@ -118,8 +118,8 @@ app.post('/create_group', async (req, res) => {
     const course_id = course_result.rows[0]?.course_id;
 
     await db.query(
-      'INSERT INTO study_groups (group_name, group_type, max_members, group_course_id) VALUES ($1, $2, $3, $4)',
-      [group_name, group_type, max_members, course_id]
+      'INSERT INTO study_groups (group_name, group_type, max_members, group_course_id, meeting_time, location) VALUES ($1, $2, $3, $4, $5, $6)',
+      [group_name, group_type, max_members, course_id, meeting_time, location]
     );
 
     const study_group_result = await db.query(

@@ -2,11 +2,13 @@ import React, {useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function CreateGroup() {
-
+    //useState is default
     const [group_name, setGroupName] = useState('');
-    const [course, setCourse] = useState('');//default
-    const [group_type, setGroupType] = useState('');//default
+    const [course, setCourse] = useState('');
+    const [group_type, setGroupType] = useState('');
     const [max_members, setMaxMembers] = useState('');
+    const [location, setLocation] = useState('');
+    const [meeting_time, setMeetingTime] = useState('');
     const navigate = useNavigate();
 
     const handleCreateGroup = async (e) => {
@@ -29,7 +31,8 @@ function CreateGroup() {
             'Content-Type': 'application/json',
             'user_id': user.user_id
           },
-          body: JSON.stringify({ group_name, course, group_type, max_members })
+          body: JSON.stringify(
+            { group_name, course, group_type, max_members, meeting_time, location })
         });
     
         const data = await res.json();
@@ -65,6 +68,21 @@ function CreateGroup() {
                     <option value="Private">Private</option>
                     <option value="Invite-Only">Invite-Only</option>
                 </select><br/><br/>
+
+                        
+                <label for="location">Choose a meeting location: </label>
+                <select name="location" id="locations" onChange={e => setLocation(e.target.value)}>
+                    <option value="">Select a location</option>
+                    <option value="EVLB210">Evansdale Library 210</option>
+                    <option value="ELC">ELC</option>
+                    <option value="LCSEE">LCSEE</option>
+                    <option value="DTLB115">Downtown Library 115</option>
+                </select><br/><br/>
+
+                <label for="time">Set a meeting time: </label>
+                <input type="time" id="time" name="time" 
+                       min="06:00" max="22:00" required
+                       onChange={e => setMeetingTime(e.target.value)}/><br/><br/>
         
                 <label for="max_members">Enter a max number of members (Maximum = 50) </label>
                 <input name="max_members" type="number" placeholder="Enter max members" 
