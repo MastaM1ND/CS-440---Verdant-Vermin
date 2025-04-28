@@ -159,6 +159,19 @@ app.post('/groups/:id/join', async (req, res) => {
       return res.status(400).json({ success: false, message: 'You are already a member of this group.' });
     }
 
+    const checkMemberAmount = await db.query(
+      'SELECT sg.max_members, COUNT(gm.member_id) AS member_count\
+       FROM study_groups sg\
+       LEFT JOIN group_members gm ON sg.group_id = gm.study_group_id\
+       WHERE sg.group_id = $1\
+       GROUP BY sg.max_members',
+      [groupId]
+    );
+
+    if (checkMemberAmount.rows[0].max_members <= checkMemberAmount.rows[0].member_count) {
+      return res.status(400).json({ success: false, message: 'Group is full.' });
+    }
+
     // Add member
     await db.query(
       'INSERT INTO group_members (study_group_id, member_id, role, status) VALUES ($1, $2, $3, $4)',
@@ -179,3 +192,4 @@ app.post('/groups/:id/join', async (req, res) => {
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
+
