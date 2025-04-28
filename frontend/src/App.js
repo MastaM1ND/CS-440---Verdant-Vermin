@@ -4,6 +4,7 @@ import Signup from './Signup';
 import Groups from './Groups';
 import NavBar from './components/NavBar';
 import CreateGroup from './CreateGroup';
+import Account from './Account';
 import RequireAuth from './components/RequireAuth';
 
 // This inner component allows dynamic hiding of NavBar
@@ -33,6 +34,15 @@ function AppRoutes() {
           element={
             <RequireAuth>
               <CreateGroup />
+            </RequireAuth>
+          } 
+        />
+
+        <Route 
+          path="/account" 
+          element={
+            <RequireAuth>
+              <Account />
             </RequireAuth>
           } 
         />
