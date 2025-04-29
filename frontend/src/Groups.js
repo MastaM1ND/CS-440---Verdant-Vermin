@@ -64,7 +64,8 @@ function Groups() {
             }}
           >
             <strong>{group.group_name}</strong><br />
-            Type: {group.group_type} | Max Members: {group.max_members}
+            Course: {group.course_name} | Type: {group.group_type} | Members: {group.member_count}/{group.max_members}<br />
+            Owner: {group.username} 
             <br />
             <button
               onClick={() => handleJoin(group.group_id)}

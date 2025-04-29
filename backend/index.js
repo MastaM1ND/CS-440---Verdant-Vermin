@@ -31,7 +31,30 @@ app.get('/', (req, res) => {
 });
 
 // ==========================
-// User Signup
+// Get Study Groups
+// ==========================
+app.get('/groups', async (req, res) => {
+  try {
+    const result = await db.query("SELECT sg.*, c.course_name, creator.username, COUNT(gm.member_id) AS member_count\
+                                   FROM study_groups sg\
+                                   LEFT JOIN courses c ON sg.group_course_id = c.course_id\
+                                   LEFT JOIN group_members gm ON sg.group_id = gm.study_group_id\
+                                   LEFT JOIN users creator ON creator.user_id = (\
+                                            SELECT gm2.member_id\
+                                            FROM group_members gm2\
+                                            WHERE gm2.study_group_id = sg.group_id AND LOWER(gm2.role) = 'creator'\
+                                            LIMIT 1\
+                                   )\
+                                   GROUP BY sg.group_id, c.course_name, creator.username");
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error fetching groups:', err);
+    res.status(500).json({ error: 'Failed to fetch study groups' });
+  }
+});
+
+// ==========================
+// Signup Route
 // ==========================
 app.post('/signup', async (req, res) => {
   const { username, email, password } = req.body;
@@ -89,7 +112,7 @@ app.get('/groups', async (req, res) => {
 
 // Create a Group
 app.post('/create_group', async (req, res) => {
-  const { group_name, course, group_type, max_members } = req.body;
+  const { group_name, course, group_type, max_members, meeting_time, location } = req.body;
   const user_id = req.headers['user_id'];
 
   try {
@@ -100,8 +123,8 @@ app.post('/create_group', async (req, res) => {
     const course_id = course_result.rows[0]?.course_id;
 
     await db.query(
-      'INSERT INTO study_groups (group_name, group_type, max_members, group_course_id) VALUES ($1, $2, $3, $4)',
-      [group_name, group_type, max_members, course_id]
+      'INSERT INTO study_groups (group_name, group_type, max_members, group_course_id, meeting_time, location) VALUES ($1, $2, $3, $4, $5, $6)',
+      [group_name, group_type, max_members, course_id, meeting_time, location]
     );
 
     const study_group_result = await db.query(
@@ -112,8 +135,8 @@ app.post('/create_group', async (req, res) => {
 
     await db.query(
       'INSERT INTO group_members (study_group_id, member_id, role, status) VALUES ($1, $2, $3, $4)',
-      [study_group_id, user_id, "Creator", "Active"]
-    );
+      [study_group_id, user_id, "creator", "active"]
+    )
 
     res.json({ success: true });
   } catch (err) {
@@ -137,6 +160,20 @@ app.post('/groups/:id/join', async (req, res) => {
       return res.json({ success: false, message: 'You are already a member of this group.' }); // 🔥 No more 400 error!
     }
 
+    const checkMemberAmount = await db.query(
+      'SELECT sg.max_members, COUNT(gm.member_id) AS member_count\
+       FROM study_groups sg\
+       LEFT JOIN group_members gm ON sg.group_id = gm.study_group_id\
+       WHERE sg.group_id = $1\
+       GROUP BY sg.max_members',
+      [groupId]
+    );
+
+    if (checkMemberAmount.rows[0].max_members <= checkMemberAmount.rows[0].member_count) {
+      return res.status(400).json({ success: false, message: 'Group is full.' });
+    }
+
+    // Add member
     await db.query(
       'INSERT INTO group_members (study_group_id, member_id, role, status) VALUES ($1, $2, $3, $4)',
       [groupId, user_id, 'member', 'active']
