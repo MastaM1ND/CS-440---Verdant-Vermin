@@ -7,7 +7,7 @@ function Groups() {
   useEffect(() => {
     fetch('http://localhost:3001/groups')
       .then(res => res.json())
-      .then(data => {console.log(data); setGroups(data);})
+      .then(data => setGroups(data))
       .catch(err => console.error('Error fetching groups:', err));
   }, []);
 
