@@ -10,36 +10,48 @@ function CreateGroup() {
     const navigate = useNavigate();
 
     const handleCreateGroup = async (e) => {
-        e.preventDefault();
-
-        //dropdown validation
-        if (!course || course === '') {
-            alert('Please select a valid course.');
-            return;
-        }
-        if (!group_type || group_type === '') {
+      e.preventDefault();
+    
+      if (!course || course === '') {
+        alert('Please select a valid course.');
+        return;
+      }
+      if (!group_type || group_type === '') {
         alert('Please select a valid group type.');
         return;
-        }
+      }
     
-        const user_id = localStorage.getItem('user_id');
+      const user = JSON.parse(localStorage.getItem('user')); // ✅ correct
+      if (!user) {
+        alert('Please login again.');
+        return;
+      }
+    
+      try {
         const res = await fetch('http://localhost:3001/create_group', {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
-            'user_id': user_id
+            'user_id': user.user_id 
           },
           body: JSON.stringify({ group_name, course, group_type, max_members })
         });
     
         const data = await res.json();
-        if (data.success) {
+        if (res.ok && data.success) {
           alert('Group Created! Returning to Main Menu');
-          navigate('/groups'); // ✅ This is what redirects to login
+          navigate('/groups', { replace: true });
+          window.location.reload();
+
         } else {
           alert(data.message || 'Group Creation Failed.');
         }
-      };
+      } catch (err) {
+        console.error('Create group error:', err);
+        alert('Server error.');
+      }
+    };
+    
 
     return(
         <div style={{ maxWidth: '600px', margin: 'auto', padding: '20px' }}>

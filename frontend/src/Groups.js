@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // 🔥 Import navigate
 
 function Groups() {
   const [groups, setGroups] = useState([]);
   const [joining, setJoining] = useState(null);
+  const navigate = useNavigate(); // 🔥 useNavigate inside Groups
 
   useEffect(() => {
     fetch('http://localhost:3001/groups')
@@ -28,15 +30,21 @@ function Groups() {
 
       if (res.ok && data.success) {
         alert('Successfully joined the group!');
+        navigate(`/group/${groupId}`); //  Navigate to GroupPage
       } else {
-        alert(data.message || 'Failed to join group.');
+        if (data.message === 'You are already a member of this group.') {
+          alert('You are already part of this group.');
+          navigate(`/group/${groupId}`); //  Still navigate!
+        } else {
+          alert(data.message || 'Failed to join group.');
+        }
       }
     } catch (err) {
       console.error('Join error:', err);
-      alert('Server error. Please try again later.');
+      alert('Server error.');
+    } finally {
+      setJoining(null); // Reset joining status after operation
     }
-
-    setJoining(null);
   };
 
   return (
