@@ -160,16 +160,20 @@ app.post('/groups/:id/join', async (req, res) => {
     }
 
     const checkMemberAmount = await db.query(
-      'SELECT sg.max_members, COUNT(gm.member_id) AS member_count\
+      'SELECT sg.max_members, sg.group_type, COUNT(gm.member_id) AS member_count\
        FROM study_groups sg\
        LEFT JOIN group_members gm ON sg.group_id = gm.study_group_id\
        WHERE sg.group_id = $1\
-       GROUP BY sg.max_members',
+       GROUP BY sg.max_members, sg.group_type',
       [groupId]
     );
 
     if (checkMemberAmount.rows[0].max_members <= checkMemberAmount.rows[0].member_count) {
       return res.status(400).json({ success: false, message: 'Group is full.' });
+    }
+    
+    if (checkMemberAmount.rows[0].group_type === 'Private') {
+      return res.status(400).json({ success: false, message: 'Group is private.' });
     }
 
     // Add member
