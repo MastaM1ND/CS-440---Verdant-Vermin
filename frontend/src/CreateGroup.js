@@ -15,17 +15,16 @@ function CreateGroup() {
     const navigate = useNavigate();
 
     const handleCreateGroup = async (e) => {
-        e.preventDefault();
-
-        //dropdown validation
-        if (!course || course === '') {
-            alert('Please select a valid course.');
-            return;
-        }
-        if (!group_type || group_type === '') {
+      e.preventDefault();
+    
+      if (!course || course === '') {
+        alert('Please select a valid course.');
+        return;
+      }
+      if (!group_type || group_type === '') {
         alert('Please select a valid group type.');
         return;
-        }
+      }
     
         const user = JSON.parse(localStorage.getItem('user'));
         const res = await fetch('http://localhost:3001/create_group', {
@@ -39,9 +38,11 @@ function CreateGroup() {
         });
     
         const data = await res.json();
-        if (data.success) {
+        if (res.ok && data.success) {
           alert('Group Created! Returning to Main Menu');
-          navigate('/groups'); // ✅ This is what redirects to login
+          navigate('/groups', { replace: true });
+          window.location.reload();
+
         } else {
           alert(data.message || 'Group Creation Failed.');
         }

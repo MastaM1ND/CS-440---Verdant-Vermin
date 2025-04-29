@@ -6,6 +6,7 @@ import NavBar from './components/NavBar';
 import CreateGroup from './CreateGroup';
 import Account from './Account';
 import RequireAuth from './components/RequireAuth';
+import GroupPage from './GroupPage';
 
 // This inner component allows dynamic hiding of NavBar
 function AppRoutes() {
@@ -58,5 +59,14 @@ function App() {
     </Router>
   );
 }
+
+<Route
+  path="/group/:id"
+  element={
+    <RequireAuth>
+      <GroupPage />
+    </RequireAuth>
+  }
+/>
 
 export default App;
