@@ -47,6 +47,15 @@ function AppRoutes() {
             </RequireAuth>
           } 
         />
+
+        <Route
+          path="/group/:id" // Dynamic route for group pages
+          element={
+            <RequireAuth>
+              <GroupPage />
+            </RequireAuth>
+          }
+        />
       </Routes>
     </>
   );
