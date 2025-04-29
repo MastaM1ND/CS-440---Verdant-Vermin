@@ -84,8 +84,8 @@ function CreateGroup() {
                        min="06:00" max="22:00" required
                        onChange={e => setMeetingTime(e.target.value)}/><br/><br/>
         
-                <label for="max_members">Enter a max number of members (Maximum = 50) </label>
-                <input name="max_members" type="number" placeholder="Enter max members" 
+                <label for="max_members">Enter a max number of members (Between 2 and 50) </label>
+                <input name="max_members" type="number" placeholder="Enter max members" max="50" min="2" required
                     onChange={e => setMaxMembers(e.target.value)}/><br/><br/>
                 <button type="submit">Create your Group</button>
             </form>
