@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import './GroupPage.css';
 import GroupInfo from './GroupInfo';
@@ -12,6 +12,8 @@ function GroupPage() {
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false); 
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
+  const messagesEndRef = useRef(null);
+
   useEffect(() => {
     fetch(`http://localhost:3001/groups/${id}`)
       .then(res => res.json())
@@ -23,6 +25,13 @@ function GroupPage() {
       .then(data => setMessages(data.messages))
       .catch(err => console.error('Error fetching messages:', err));
   }, [id]);
+
+  useEffect(() => {
+    // Scroll to the bottom whenever messages are updated
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
 
   const sendMessage = async (e) => {
     e.preventDefault();
@@ -101,6 +110,7 @@ function GroupPage() {
               <small>{new Date(msg.timestamp).toLocaleString()}</small>
             </div>
           ))}
+          <div ref={messagesEndRef} />
         </div>
 
         <form className="send-message-form" onSubmit={sendMessage}>
