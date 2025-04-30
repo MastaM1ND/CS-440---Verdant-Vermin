@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import './GroupPage.css';
+import GroupInfo from './GroupInfo';
+import GroupSettings from './GroupSettings';
 
 function GroupPage() {
   const { id } = useParams(); // groupId from URL
   const [group, setGroup] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false); 
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
   useEffect(() => {
     fetch(`http://localhost:3001/groups/${id}`)
@@ -53,6 +57,39 @@ function GroupPage() {
         <p>Type: {group.group_type}</p>
         <p>Max Members: {group.max_members}</p>
       </div>
+
+      <div className="group-actions">
+        <button onClick={() => setIsInfoModalOpen(true)} className="action-button">
+          View Info
+        </button>
+        <button onClick={() => setIsSettingsModalOpen(true)} className="action-button">
+          Settings
+        </button>
+      </div>
+
+      {/* Group Info Modal */}
+      {isInfoModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <button className="close-button" onClick={() => setIsInfoModalOpen(false)}>
+              &times;
+            </button>
+            <GroupInfo group={group} />
+          </div>
+        </div>
+      )}
+
+      {/* Group Settings Modal */}
+      {isSettingsModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <button className="close-button" onClick={() => setIsSettingsModalOpen(false)}>
+              &times;
+            </button>
+            <GroupSettings group={group} />
+          </div>
+        </div>
+      )}
 
       <div className="messages-section">
         <h3>Messages</h3>

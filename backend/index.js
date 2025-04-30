@@ -194,7 +194,13 @@ app.post('/groups/:id/join', async (req, res) => {
 app.get('/groups/:id', async (req, res) => {
   const groupId = req.params.id;
   try {
-    const result = await db.query('SELECT * FROM study_groups WHERE group_id = $1', [groupId]);
+    const result = await db.query(
+      'SELECT sg.*, c.course_name\
+       FROM study_groups sg\
+       LEFT JOIN courses c on sg.group_course_id = c.course_id\
+       WHERE group_id = $1\
+       GROUP BY sg.group_id, c.course_name',
+       [groupId]);
     if (result.rows.length === 0) {
       return res.status(404).json({ success: false, message: 'Group not found' });
     }
@@ -202,6 +208,55 @@ app.get('/groups/:id', async (req, res) => {
   } catch (err) {
     console.error('Group fetch error:', err);
     res.status(500).json({ success: false, message: 'Failed to fetch group' });
+  }
+});
+
+// Get Group Members Info
+app.get('/groups/:id/info', async (req, res) => {
+  const group_id = req.params.id;
+  try{
+    const result = await db.query(
+      'SELECT u.username, gm.role\
+       FROM users u\
+       LEFT JOIN group_members gm ON u.user_id = gm.member_id\
+       WHERE gm.study_group_id = $1',
+       [group_id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Members not found' });
+    }
+    res.json({ success: true, info: result.rows });
+  }
+  catch(err){
+    console.error('Group info fetch error:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch group info' });
+  }
+
+});
+
+// Update Group Settings
+app.post('/groups/:id/update', async (req, res) => {
+  const groupId = req.params.id;
+  const { group_name, meeting_time, location, user_id, group_id } = req.body;
+  try {
+
+    const check = await db.query(
+      'SELECT role FROM group_members WHERE member_id = $1 AND study_group_id = $2;',
+       [user_id, group_id]
+    );
+
+    if (check.rows.length === 0 || check.rows[0].role !== 'creator') {
+      return res.status(403).json({ success: false, message: 'You are not authorized to update this group.' });
+    }
+
+    await db.query(
+      'UPDATE study_groups SET group_name = $1, meeting_time = $2, location = $3 WHERE group_id = $4',
+      [group_name, meeting_time, location, groupId]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Group update error:', err);
+    res.status(500).json({ success: false, message: 'Failed to update group' });
   }
 });
 
