@@ -1,0 +1,78 @@
+.account-page {
+  max-width: 800px;
+  margin: 30px auto;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.account-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.account-header h1 {
+  color: #1976d2;
+  margin-bottom: 10px;
+}
+
+.account-header p {
+  color: #555;
+  margin: 0;
+}
+
+.group-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+}
+
+.group-item {
+  border: 1px solid #ddd;
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.group-item h3 {
+  margin: 0 0 5px;
+  color: #1976d2;
+}
+
+.group-item p {
+  margin: 0 0 10px;
+  color: #444;
+}
+
+.group-item button {
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.group-item button:hover {
+  background-color: #125ea7;
+}
+
+.logout-button {
+  display: block;
+  margin: 30px auto 0;
+  padding: 10px 20px;
+  background-color: #d32f2f;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.logout-button:hover {
+  background-color: #b71c1c;
+}
