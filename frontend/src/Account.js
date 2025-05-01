@@ -4,63 +4,54 @@ import './Account.css';
 
 function Account() {
 
-    const [user, setUser] = useState(null);
+
+    const user = JSON.parse(localStorage.getItem('user'));
+    const user_id = user.user_id;
     const [groups, setGroups] = useState([]);
     const navigate = useNavigate();
 
     useEffect(() => {
 
-        const user = JSON.parse(localStorage.getItem('user'));
-        if (!user) {
-            navigate('/login');
-            return;
-        }
-
-        setUser(user);
-
         const fetchGroups = async () => {
-
             try {
-
-                const res = await fetch(`http://localhost:3001/user-groups/${user.user_id}`);
-                const data = await res.json();
-
-                if (res.ok) {
-                    setGroups(Array.isArray(data) ? data : (data.groups || []));
-                } else {
-                    alert(data.message || 'Failed to fetch groups!');
+                const response = await fetch(`http://localhost:3001/user-groups/${user_id}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch groups');
                 }
-            } catch (e) {
-                console.error('Fetch group error: ', e);
-                alert('Server error - fetch group.');
+                const data = await response.json();
+                setGroups(data);
+            } catch (err) {
+                console.error('Fetch groups error: ', err);
+                alert('Server error - fetch groups.');
             }
         };
 
         fetchGroups();
-    }, [navigate]);
+    }, [user_id]);
 
     const handleLeaveGroup = async (groupId) => {
 
+        if (!window.confirm('Are you sure you want to leave this group?')) return;
+
         try {
-
-            const res = await fetch(`http://localhost:3001/groups/${groupId}/leave`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: user.user_id })
-            });
-
-            if (res.ok) {
-
-                setGroups(prev => prev.filter(g => g.id !== groupId));
-
+            const response = await fetch(`http://localhost:3001/user-groups/${user_id}/leave`, {
+                method: 'DELETE',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ group_id: groupId })
+              });
+            if (!response.ok) {
+                throw new Error('Failed to leave group!');
+            }
+            const data = await response.json();
+            if (data.success) {
+                alert('Successfully left the group!');
+                window.location.reload(); // Reload the page to reflect changes
             } else {
-
-                const data = await res.json();
                 alert(data.message || 'Failed to leave group!');
             }
-        } catch (e) {
-            console.error('Leave group error: ', e);
-            alert('Server error - leave group.');
+        } catch (err) {
+            console.error('leave group error', err);
+            alert('Failed to leave group!');
         }
     };
 
@@ -69,30 +60,31 @@ function Account() {
         if (!window.confirm('Are you sure you want to delete this group?')) return;
 
         try {
-
-            const res = await fetch(`http://localhost:3001/groups/${groupId}`, {
-                method: 'DELETE'
-            });
-
-            if (res.ok) {
-
-                setGroups(prev => prev.filter(g => g.id !== groupId));
+            const response = await fetch(`http://localhost:3001/user-groups/${user_id}/delete`, {
+                method: 'DELETE',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ group_id: groupId })
+              });
+            if (!response.ok) {
+                throw new Error('Failed to leave group!');
+            }
+            const data = await response.json();
+            if (data.success) {
+                alert('Successfully deleted the group!');
+                window.location.reload(); // Reload the page to reflect changes
             } else {
-
-                const data = await res.json();
                 alert(data.message || 'Failed to delete group!');
             }
-
-        } catch (e) {
-            console.error('Delete group error: ', e);
-            alert('Server error - delete group');
+        } catch (err) {
+            console.error('delete group error', err);
+            alert('Failed to delete group!');
         }
     };
 
     const handleLogout = () => {
 
         localStorage.removeItem('user');
-        navigate('/signup');
+        navigate('/login');
     };
 
     if (!user) return null;
@@ -108,15 +100,17 @@ function Account() {
             <ul className="group-list">
                 {groups.length > 0 ? (
                     groups.map(group => (
-                        <li key={group.id} className="group-item">
-                            <h3>{group.name}</h3>
-                            <p><strong>Course:</strong> {group.course_code}</p>
-                            <p>{group.description}</p>
-                            {group.created_by === user.user_id ? (
-                                <button onClick={() => handleDeleteGroup(group.id)}>Delete Group</button>
-                            ) : (
-                                <button onClick={() => handleLeaveGroup(group.id)}>Leave Group</button>
-                            )}
+                        <li key={group.group_id} className="group-item">
+                            <h3>{group.group_name}</h3>
+                            <p><strong>Course:</strong> {group.course_name}</p>
+                            <div className="button-container">
+                                <button onClick={() => navigate(`/group/${group.group_id}`)}>Enter Group</button>
+                                {group.role === "creator" ? (
+                                    <button onClick={() => handleDeleteGroup(group.group_id)}>Delete Group</button>
+                                ) : (
+                                    <button onClick={() => handleLeaveGroup(group.group_id)}>Leave Group</button>
+                                )}
+                            </div>
                         </li>
                     ))
                 ) : (

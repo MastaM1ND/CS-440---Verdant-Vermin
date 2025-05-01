@@ -111,15 +111,59 @@ app.get('/groups', async (req, res) => {
 });
 
 // Get User-Specific Groups
-app.get('/user-groups', async (req, res) => {
+app.get('/user-groups/:id', async (req, res) => {
   try {
+    const user_id = req.params.id;
     const result = await db.query(
-      'SELECT sg.* FROM study_groups sg JOIN group_members gm ON sg.group_id = gm.study_group_id WHERE gm.member_id = $1'
-      );
+      'SELECT sg.*, c.course_name, gm.role FROM study_groups sg \
+       LEFT JOIN group_members gm ON sg.group_id = gm.study_group_id\
+       LEFT JOIN courses c ON sg.group_course_id = c.course_id \
+       WHERE gm.member_id = $1',
+      [user_id]
+    );
+
+    res.json(result.rows);
+
   } catch (err) {
     console.error('Failed to retrieve user groups.');
+    res.status(500).json({ error: 'Failed to fetch study groups' });
   }
 
+});
+
+app.delete('/user-groups/:id/leave', async (req, res) => {
+  try{
+    const user_id = req.params.id;
+    const group_id = req.body.group_id;
+
+    await db.query(
+      'DELETE FROM group_members WHERE member_id = $1 AND study_group_id = $2',
+      [user_id, group_id]
+    );
+
+    res.json({ success: true });
+
+  }catch(err){
+    console.error('Failed to leave group.');
+    res.status(500).json({ error: 'Failed to leave group' });
+  }
+});
+
+app.delete('/user-groups/:id/delete', async (req, res) => {
+  try{
+    const group_id = req.body.group_id;
+
+    await db.query(
+      'DELETE FROM study_groups WHERE group_id = $1',
+      [group_id]
+    );
+
+    res.json({ success: true });
+
+  }catch(err){
+    console.error(err);
+    res.status(500).json({ error: 'Failed to delete group' });
+  }
 });
 
 // Create a Group

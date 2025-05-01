@@ -13,7 +13,7 @@ function GroupSettings({ group }) {
       const res = await fetch(`http://localhost:3001/groups/${group.group_id}/update`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ group_name: groupName, meeting_time: meetingTime, location, user_id: user.user_id, group_id: group.group_id }),
+        body: JSON.stringify({ group_name: groupName, meeting_time: meetingTime, location, user_id: user.user_id, group_id: group.group_id })
       });
 
       const data = await res.json();
