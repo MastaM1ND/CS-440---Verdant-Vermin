@@ -110,6 +110,18 @@ app.get('/groups', async (req, res) => {
   }
 });
 
+// Get User-Specific Groups
+app.get('/user-groups', async (req, res) => {
+  try {
+    const result = await db.query(
+      'SELECT sg.* FROM study_groups sg JOIN group_members gm ON sg.group_id = gm.study_group_id WHERE gm.member_id = $1'
+      );
+  } catch (err) {
+    console.error('Failed to retrieve user groups.');
+  }
+
+});
+
 // Create a Group
 app.post('/create_group', async (req, res) => {
   const { group_name, course, group_type, max_members, meeting_time, location } = req.body;
