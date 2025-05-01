@@ -9,3 +9,5 @@ in backend, run "node index.js"
 in frontend, run "npm start"
 
 Finally, open http://localhost:3000 on your web browser to use the application
+
+https://github.com/MastaM1ND/CS-440---Verdant-Vermin
