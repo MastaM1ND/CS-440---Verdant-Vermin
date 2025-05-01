@@ -1,12 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import './GroupPage.css';
+import GroupInfo from './GroupInfo';
+import GroupSettings from './GroupSettings';
 
 function GroupPage() {
   const { id } = useParams(); // groupId from URL
   const [group, setGroup] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false); 
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
     fetch(`http://localhost:3001/groups/${id}`)
@@ -19,6 +25,13 @@ function GroupPage() {
       .then(data => setMessages(data.messages))
       .catch(err => console.error('Error fetching messages:', err));
   }, [id]);
+
+  useEffect(() => {
+    // Scroll to the bottom whenever messages are updated
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
 
   const sendMessage = async (e) => {
     e.preventDefault();
@@ -54,6 +67,39 @@ function GroupPage() {
         <p>Max Members: {group.max_members}</p>
       </div>
 
+      <div className="group-actions">
+        <button onClick={() => setIsInfoModalOpen(true)} className="action-button">
+          View Info
+        </button>
+        <button onClick={() => setIsSettingsModalOpen(true)} className="action-button">
+          Settings
+        </button>
+      </div>
+
+      {/* Group Info Modal */}
+      {isInfoModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <button className="close-button" onClick={() => setIsInfoModalOpen(false)}>
+              &times;
+            </button>
+            <GroupInfo group={group} />
+          </div>
+        </div>
+      )}
+
+      {/* Group Settings Modal */}
+      {isSettingsModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <button className="close-button" onClick={() => setIsSettingsModalOpen(false)}>
+              &times;
+            </button>
+            <GroupSettings group={group} />
+          </div>
+        </div>
+      )}
+
       <div className="messages-section">
         <h3>Messages</h3>
         <div className="messages-list">
@@ -64,6 +110,7 @@ function GroupPage() {
               <small>{new Date(msg.timestamp).toLocaleString()}</small>
             </div>
           ))}
+          <div ref={messagesEndRef} />
         </div>
 
         <form className="send-message-form" onSubmit={sendMessage}>
