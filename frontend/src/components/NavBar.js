@@ -22,6 +22,7 @@ const NavBar = () => {
           <Link to="/groups">Home</Link>
           <Link to="/create_group">Create Group</Link>
           <Link to="/account">Account</Link>
+          <Link to="/report">Report</Link>
         </div>
       )}
 

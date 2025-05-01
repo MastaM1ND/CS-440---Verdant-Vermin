@@ -145,6 +145,32 @@ app.post('/create_group', async (req, res) => {
   }
 });
 
+/**
+ * Report a User
+ */
+app.post('/report', async (req, res) => {
+  const { reported_username, report_type, written_statement } = req.body;
+  const user_id = req.headers['user_id'];
+
+  try {
+    const course_result = await db.query(
+      'SELECT user_id FROM users WHERE username = LOWER($1)',
+      [reported_username]
+    );
+    const reported_user_id = course_result.rows[0]?.user_id;
+
+    await db.query(
+      'INSERT INTO reports (category, status, written_statement, timestamp, reporter_id, reported_user_id) VALUES ($1, $2, $3, NOW(), $4, $5)',
+      [report_type, "Unresolved", written_statement, user_id, reported_user_id]
+    );
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Group Creation error:', err);
+    res.status(500).json({ success: false, message: 'Failed to Create Group' });
+  }
+});
+
 // Join a Group
 app.post('/groups/:id/join', async (req, res) => {
   const groupId = req.params.id;
