@@ -25,7 +25,6 @@
 
 .button-container {
   display: flex;
-  justify-content: left;
   gap: 10px;
 }
 
@@ -54,6 +53,22 @@
 }
 
 .group-item button {
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.filter-buttons {
+  display: flex;
+  flex-direction: column; 
+  align-items: flex-start;
+}
+
+.filter-button {
   background-color: #1976d2;
   color: white;
   border: none;

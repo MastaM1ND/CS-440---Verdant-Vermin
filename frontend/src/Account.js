@@ -8,6 +8,7 @@ function Account() {
     const user = JSON.parse(localStorage.getItem('user'));
     const user_id = user.user_id;
     const [groups, setGroups] = useState([]);
+    const [filter, setFilter] = useState('all'); // Default filter to 'all'
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -87,6 +88,10 @@ function Account() {
         navigate('/login');
     };
 
+    const handleFilterChange = (newFilter) => {
+        setFilter(newFilter); // Reload the page to reflect changes
+    }
+
     if (!user) return null;
 
     return (
@@ -95,11 +100,44 @@ function Account() {
                 <h1>Your Account</h1>
                 <p>{user.email}</p>
             </div>
-
-            <h2>Your Study Groups</h2>
+            <div className="headers">
+                <h2>Your Study Groups</h2>
+                <div className="filter-buttons">
+                    <h2>Filter:</h2>
+                    <div className="button-container">
+                        <button 
+                            className="filter-button" 
+                            onClick={() => handleFilterChange('creator')}
+                        >
+                            Owner
+                        </button>
+                        <button 
+                            className="filter-button" 
+                            onClick={() => handleFilterChange('member')}
+                        >
+                            Member
+                        </button>
+                        <button 
+                            className="filter-button" 
+                            onClick={() => handleFilterChange('all')}
+                        >
+                            All
+                        </button>
+                    </div>
+                </div>
+            </div>
             <ul className="group-list">
                 {groups.length > 0 ? (
-                    groups.map(group => (
+                    groups.filter(group => {
+                        if(filter === 'creator') {
+                            return group.role === 'creator';
+                        }
+                        if(filter === 'member') {
+                            return group.role === 'member';
+                        }
+                        return true;
+                    })
+                    .map(group => (
                         <li key={group.group_id} className="group-item">
                             <h3>{group.group_name}</h3>
                             <p><strong>Course:</strong> {group.course_name}</p>
